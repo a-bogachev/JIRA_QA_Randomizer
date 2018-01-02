@@ -13,12 +13,12 @@ namespace JIRA_QA_Randomizer
         {
             string issueId="";
             //Checking console parameter.
-            if ( Regex.IsMatch( args[ 0 ], "^[1-9][0-9]*$" ) == false )
-            {
-                Console.WriteLine( "Please enter only numbers of the issue key. Exit with no changes" );
-                Environment.Exit( 1 );
-            }
-            else issueId = "demo-" + args[ 0 ];
+            //if ( Regex.IsMatch( args[ 0 ], "^[1-9][0-9]*$" ) == false )
+            //{
+            //    Console.WriteLine( "Please enter only numbers of the issue key. Exit with no changes" );
+            //    Environment.Exit( 1 );
+            //}
+            //else issueId = "demo-" + args[ 0 ];
 
             // Reading users list.
             List<string> group = new List<string>( );
@@ -35,30 +35,30 @@ namespace JIRA_QA_Randomizer
             }
             
             // Shuffle user list.
-            Random rand = new Random( );
-            var shuffledGroupNames = group.OrderBy( c => rand.Next( ) ).Select( c => c ).ToList( );
+            //Random rand = new Random( );
+            //var shuffledGroupNames = group.OrderBy( c => rand.Next( ) ).Select( c => c ).ToList( );
             // Creating pairs of users Packager-QA Engineer
-            List<string> group1 = new List<string>( );
-            List<string> group2 = new List<string>( );
-            for (int i=0; i<shuffledGroupNames.Count; i++ )
-            {
-                if (i < shuffledGroupNames.Count / 2 )
-                {
-                    group1.Add( shuffledGroupNames[ i ] );
-                }
-                else
-                {
-                    group2.Add( shuffledGroupNames[ i ] );
-                }
-            }
+            //List<string> group1 = new List<string>( );
+            //List<string> group2 = new List<string>( );
+            //for (int i=0; i<shuffledGroupNames.Count; i++ )
+            //{
+            //    if (i < shuffledGroupNames.Count / 2 )
+            //    {
+            //        group1.Add( shuffledGroupNames[ i ] );
+            //    }
+            //    else
+            //    {
+            //        group2.Add( shuffledGroupNames[ i ] );
+            //    }
+            //}
             // Dublicating issues.
-            for ( int i = 1; i < group1.Count; i++ )
-            {
-                duplicate( issueId, group1[ i ], group2[ i ] );
-                duplicate( issueId, group2[ i ], group1[ i ] );
-            }
-            duplicate( issueId, group2[ 0 ], group1[ 0 ] );
-            setPeople( issueId, group1[ 0 ], group2[ 0 ] ); 
+            //for ( int i = 1; i < group1.Count; i++ )
+            //{
+            //    duplicate( issueId, group1[ i ], group2[ i ] );
+            //    duplicate( issueId, group2[ i ], group1[ i ] );
+            //}
+            //duplicate( issueId, group2[ 0 ], group1[ 0 ] );
+            //setPeople( issueId, group1[ 0 ], group2[ 0 ] ); 
 
             Console.WriteLine( "All tasks created. Press any key." );
             Console.ReadKey();
