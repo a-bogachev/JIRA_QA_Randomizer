@@ -13,18 +13,18 @@ namespace JIRA_QA_Randomizer
         {
             string issueId="";
             //Checking console parameter.
-            //if ( Regex.IsMatch( args[ 0 ], "^[1-9][0-9]*$" ) == false )
-            //{
-            //    Console.WriteLine( "Please enter only numbers of the issue key. Exit with no changes" );
-            //    Environment.Exit( 1 );
-            //}
-            //else issueId = "demo-" + args[ 0 ];
+            if (Regex.IsMatch(args[0], "^[1-9][0-9]*$") == false)
+            {
+                Console.WriteLine("Please enter only numbers of the issue key. Exit with no changes");
+                Environment.Exit(1);
+            }
+            else issueId = "demo-" + args[0];
 
             // Reading users list.
             List<string> group = new List<string>( );
             try
-            {                
-                System.IO.StreamReader file = new System.IO.StreamReader( @"users.txt" );
+            {
+                System.IO.StreamReader file = new System.IO.StreamReader(@"..\..\users.txt");
                 while ( !file.EndOfStream )
                     group.Add( file.ReadLine( ) );
             }
@@ -33,32 +33,32 @@ namespace JIRA_QA_Randomizer
                 Console.WriteLine( "Please check existing file users.txt. Exit with no changes" );
                 Environment.Exit( 2 );
             }
-            
+
             // Shuffle user list.
-            //Random rand = new Random( );
-            //var shuffledGroupNames = group.OrderBy( c => rand.Next( ) ).Select( c => c ).ToList( );
+            Random rand = new Random();
+            var shuffledGroupNames = group.OrderBy(c => rand.Next()).Select(c => c).ToList();
             // Creating pairs of users Packager-QA Engineer
-            //List<string> group1 = new List<string>( );
-            //List<string> group2 = new List<string>( );
-            //for (int i=0; i<shuffledGroupNames.Count; i++ )
-            //{
-            //    if (i < shuffledGroupNames.Count / 2 )
-            //    {
-            //        group1.Add( shuffledGroupNames[ i ] );
-            //    }
-            //    else
-            //    {
-            //        group2.Add( shuffledGroupNames[ i ] );
-            //    }
-            //}
+            List<string> group1 = new List<string>();
+            List<string> group2 = new List<string>();
+            for (int i = 0; i < shuffledGroupNames.Count; i++)
+            {
+                if (i < shuffledGroupNames.Count / 2)
+                {
+                    group1.Add(shuffledGroupNames[i]);
+                }
+                else
+                {
+                    group2.Add(shuffledGroupNames[i]);
+                }
+            }
             // Dublicating issues.
-            //for ( int i = 1; i < group1.Count; i++ )
-            //{
-            //    duplicate( issueId, group1[ i ], group2[ i ] );
-            //    duplicate( issueId, group2[ i ], group1[ i ] );
-            //}
-            //duplicate( issueId, group2[ 0 ], group1[ 0 ] );
-            //setPeople( issueId, group1[ 0 ], group2[ 0 ] ); 
+            for (int i = 1; i < group1.Count; i++)
+            {
+                duplicate(issueId, group1[i], group2[i]);
+                duplicate(issueId, group2[i], group1[i]);
+            }
+            duplicate(issueId, group2[0], group1[0]);
+            setPeople(issueId, group1[0], group2[0]);
 
             Console.WriteLine( "All tasks created. Press any key." );
             Console.ReadKey();
@@ -69,38 +69,43 @@ namespace JIRA_QA_Randomizer
             string address = "", login = "", password = "";
             try
             {
-                System.IO.StreamReader file = new System.IO.StreamReader( @"config.txt" );
-                address = file.ReadLine( );
-                login = file.ReadLine( );
-                password = file.ReadLine( );
+                address = Environment.GetEnvironmentVariable("jiraaddress");
+                login = Environment.GetEnvironmentVariable("jiralogin");
+                password = Environment.GetEnvironmentVariable("jirapass");
             }
-            catch ( System.IO.FileNotFoundException )
+            catch (ArgumentNullException)
             {
-                Console.WriteLine( "Please check existing file config.txt. Exit with no changes" );
+                Console.WriteLine( "Environment variable(s) is not found." );
                 Environment.Exit( 2 );
             }
-            Jira client = Jira.CreateRestClient( address, login, password );
+            catch (System.Security.SecurityException)
+            {
+                Console.WriteLine("You have no permissions to get environment vaiable(s).");
+                Environment.Exit( 2 );
+            }
+
+            Jira client = Jira.CreateRestClient(address, login, password);
             try
             {
-                Issue newIssue = GetIssue( client, issueKey ).Result;
-                var transitions = newIssue.GetAvailableActionsAsync( ).Result;
-                foreach (var item in transitions )
+                Issue newIssue = GetIssue(client, issueKey).Result;
+                var transitions = newIssue.GetAvailableActionsAsync().Result;
+                foreach (var item in transitions)
                 {
-                    if (item.Name == "Order Packaging" )
+                    if (item.Name == "Order Packaging")
                     {
-                        newIssue.WorkflowTransitionAsync( item.Name ).Wait( );
+                        newIssue.WorkflowTransitionAsync(item.Name).Wait();
                     }
                 }
-                newIssue.CustomFields.Add( "Packager", packager );
-                newIssue.CustomFields.Add( "QA Engineer", qaEngineer );
+                newIssue.CustomFields.Add("Packager", packager);
+                newIssue.CustomFields.Add("QA Engineer", qaEngineer);
                 newIssue.Assignee = packager;
-                newIssue.SaveChanges( );
+                newIssue.SaveChanges();
             }
-            catch ( AggregateException e )
+            catch (AggregateException e)
             {
-                Console.WriteLine( "Please check if this issue exists." );
-                Console.WriteLine( e.Message );
-                Environment.Exit( 3 );
+                Console.WriteLine("Please check if this issue exists.");
+                Console.WriteLine(e.Message);
+                Environment.Exit(3);
             }
         }
 
